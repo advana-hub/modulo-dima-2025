@@ -1,8 +1,10 @@
+
 # /// script
 # dependencies = [
-#   "marimo==0.11.15",
+#   "marimo==0.10.12",
 # ]
 # ///
+
 import marimo
 
 __generated_with = "0.10.12"
@@ -12,19 +14,65 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import marimo as mo
-
     return (mo,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        """
-        # 0. Info organizzative
+    mo.md("""# 0. Benvenuti! 👋""")
+    return
 
-        - quando si terranno gli incontri
-        - criteri di superamento dell'esame (partecipazione attiva + colloquio finale)
-        - roadmap del corso
+
+@app.cell
+def _(mo):
+    mo.md(r"""## 0.1 chi""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## 0.2 quando/dove
+
+        - una lezione a settimana, il mercoledì pomeriggio, nell’orario 14:00-17:00
+        - aula PC3 (al quarto piano, di fronte alla biblioteca)
+        - dal 12 marzo al 28 maggio, con l'esclusione del 23 e 30 aprile (pausa festività)
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## 0.3 come
+
+        - sessione di esami: mese di giugno (da concordare)
+        - consigliamo a ciascuno di voi di utilizzare il proprio laptop personale
+        - prerequisiti (nice-to-have, non bloccanti!): 🐍 Programmazione 2 (48382), 🧠 Machine Learning (114944)
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        ## 0.4 cosa
+
+        1. Cos’è la Data Science?
+        2. Modern Python per Data Scientist
+        3. Preparazione dati
+        4. Analisi esplorativa
+        5. Feature engineering
+        6. Dimensionality reduction
+        7. Clustering
+        8. Topic modeling
+        9. Regression
+        10. Lezione bonus 👀
         """
     )
     return
@@ -44,10 +92,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md(r"""# 2. Cos'è la Data Science?""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(
         """
-        # 2. Cos'è la Data Science?
-
         ## 2.1 Un po' di storia
 
         _(un po' di storia da [50 years of Data Science](http://courses.csail.mit.edu/18.337/2015/docs/50YearsDataScience.pdf))_
@@ -57,6 +109,16 @@ def _(mo):
 
         > _**procedures** for analyzing data, **techniques** for interpreting the results of such procedures, ways of **planning the gathering of data to make its analysis easier**, more precise or more accurate, and **all the machinery and results of (mathematical) statistics** which apply to analyzing data_
 
+        [^1]: Ideatore dell'algoritmo FFT.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
         !!! tip
             FIn dall'inizio era quindi chiaro agli addetti ai lavori che i problemi che avrebbe dovuto affrontare la data science non erano _nuovi di per sè_, ma il fatto che riguardassero il (giovane) mondo dei dati poneva delle complessità nuove relativamente all'approccio.
 
@@ -65,30 +127,20 @@ def _(mo):
         > _Aren’t **we** Data Science?_ <small>Marie Davidian, American Statistical Association President, 2013</small>
 
         > Is data science just a **rebranding** of statistics? <small>Martin Goodson, Royal Statistical Society, 2015</small>
+        """
+    )
+    return
 
-        [Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman)[^2] ha infine identificato due obiettivi principali della _scienza dei dati::
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        [Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman)[^2] ha infine identificato due obiettivi principali della _scienza dei dati_:
 
         1. **prediction** ➜ to be able to predict what the responses are going to be to future input variables;
         2. **inference** ➜ infer how nature is associating the response variables to the input variables.
 
-        !!! tip
-            Possiamo quindi riassumere dicendo: la data science è una disciplina che tenta di applicare il metodo sperimentale e principi/strumenti statistici all'analisi dei dati, occupandosi anche degli aspetti tecnici relativi a procedure e tecniche di acquisizione e gestione dati, al fine ultimo di produrre modelli descrittivi del dato analizzato, approfondire la relazione tra le variabili in input e le variabili in output (target) di un modello e predirre le variabili di output in corrispondenza di input noti.
-
-        !!! info "Nobel per la Fisica 2024"
-            ...
-
-        ## 2.2 Quali strumenti si usano?
-
-        Una definizione (anonima) non poi così distante dalla realtà cita:
-
-        > _A Data Scientist is a person who is better at statistics than any software engineer and better at software engineering than any statistician._
-
-        E' ormai chiaro infatti che spesso un Data Scientist non si limita a padroneggiare matematica, statistica e gli aspetti di modellazione, ma deve anche "sporcarsi le mani" con il mondo del software, dell'ingegneria dei dati, del cloud computing, etc. In questo senso, proviamo a fare una lista (disordinata!) di strumenti e competenze utili ad un Data Scientist:
-
-        - conoscenze in svariate branche della matematica: algebra lineare, algebra modulare, teoria degli insiemi, problemi inversi e teoria della regolarizzazione, ricerca operativa, probabilità, statistica descrittiva, statistica inferenziale, metodi bayesiani, metodi montecarlo, calcolo numerico, analisi di Fourier e teoria dei segnali, 
-
-
-        [^1]: Ideatore dell'algoritmo FFT.
         [^2]: Co-ideatore dell'algoritmo Random Forest.
         """
     )
@@ -98,10 +150,12 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(
-        """
-        [topology of data professions](https://excalidraw.com/#json=9U_RDdeKx2Tg4SQiZpIE3,JtO8qRPcUsmBMD169zzhgg)
+        r"""
+        !!! tip
+            Possiamo quindi riassumere dicendo: la data science è una disciplina che tenta di applicare il metodo sperimentale e principi/strumenti statistici all'analisi dei dati, occupandosi anche degli aspetti tecnici relativi a procedure e tecniche di acquisizione e gestione dati, al fine ultimo di produrre modelli descrittivi del dato analizzato, approfondire la relazione tra le variabili in input e le variabili in output (target) di un modello e predirre le variabili di output in corrispondenza di input noti.
 
-        <!-- <iframe src="https://excalidraw.com/#json=9U_RDdeKx2Tg4SQiZpIE3,JtO8qRPcUsmBMD169zzhgg" style="width:100%;height:100px"> -->
+        !!! info "Nobel per la Fisica 2024"
+            ...
         """
     )
     return
@@ -110,11 +164,42 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(
-        """
-        # Mindset/approccio
+        r"""
+        ## 2.2 Quali strumenti si usano?
 
-        - le meta-skill di uno stem e la capacità di problem solving lo abilitano a fare framing di un problema business sconosciuto in maniera rapida e sostanzialmente corretta (via via il modello mentale si arricchirà di dettagli)
-        - "vedi cose che gli altri non vedono"
+        Una definizione (anonima) non poi così distante dalla realtà cita:
+
+        > _A Data Scientist is a person who is better at statistics than any software engineer and better at software engineering than any statistician._
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        E' ormai chiaro infatti che spesso un Data Scientist non si limita a padroneggiare matematica, statistica e gli aspetti di modellazione, ma deve anche "sporcarsi le mani" con il mondo del software, dell'ingegneria dei dati, del cloud computing, etc. In questo senso, proviamo a fare una lista (disordinata!) di strumenti e competenze utili ad un Data Scientist:
+
+        - conoscenze in svariate branche della matematica: algebra lineare, algebra modulare, teoria degli insiemi, problemi inversi e teoria della regolarizzazione, ricerca operativa, probabilità, statistica descrittiva, statistica inferenziale, metodi bayesiani, metodi montecarlo, calcolo numerico, analisi di Fourier e teoria dei segnali, ...
+        - conoscenze di software engineering: basi di dati, DevOps/MLOps, versioning del codice, cloud computing, ...
+        - soft skills: comunicazione scientifica, business translation, teamwork, capacità di problem e framing di un problema sconosciuto...
+        - project management: pianificazione e controllo di tempi e costi, rispetto scadenze, ...
+        - competenze di dominio: telco, energy, supply chain, sales & marketing, pharma, logistics, ...
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        f"""
+        ## 2.3 Topology of data professions
+
+        <!-- <iframe src="https://excalidraw.com/#json=9U_RDdeKx2Tg4SQiZpIE3,JtO8qRPcUsmBMD169zzhgg" style="width:100%;height:100px"> -->
+
+        {mo.image(src="topology_data_prof.svg", caption="https://excalidraw.com/#json=9U_RDdeKx2Tg4SQiZpIE3,JtO8qRPcUsmBMD169zzhgg")}
         """
     )
     return
