@@ -1,7 +1,6 @@
-
 # /// script
 # dependencies = [
-#   "marimo==0.10.12",
+#   "marimo==0.11.15",
 # ]
 # ///
 import marimo
@@ -13,6 +12,7 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
