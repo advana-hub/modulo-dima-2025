@@ -208,6 +208,12 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    git_toggle = mo.ui.switch(label="Usando git?", value=True)
+    return (git_toggle,)
+
+
+@app.cell
+def _(git_toggle, mo):
     mo.md(
         rf"""
         # Come si possono utilizzare i notebook di questo corso?
@@ -217,16 +223,32 @@ def _(mo):
         Potete procedere:
 
         - eseguendo direttamente ciascun notebook grazie all'installazione di uv, tramite il comando `uvx marimo run https://github.com/advana-hub/modulo-dima-2025/blob/main/classes/<NOME_LEZIONE>.py`
-        - oppure per una strada più classica, che richiede però qualche setup aggiuntivo: {mo.accordion({"Espandi": """
-        1. installare [git](https://git-scm.com/downloads)
-        2. clonare la repository tramite `git clone https://github.com/advana-hub/modulo-dima-2025.git`
-        3. eseguire/modificare ogni notebook localmente tramite `uvx marimo edit <NOME_LEZIONE>.py` (se avete creato un venv e installato marimo, non serve nemmeno il comando `uvx`)
-        """})}
-
+        - oppure per una strada più classica, che richiede però qualche setup aggiuntivo
+    
+        {git_toggle}
 
         """
     )
     return
+
+
+@app.cell
+def _(git_toggle, mo):
+    way_with_git = """
+        1. installare [git](https://git-scm.com/downloads)
+        2. clonare la repository tramite `git clone https://github.com/advana-hub/modulo-dima-2025.git`
+    """
+    way_without_git = """
+        1. scaricare il contenuto del repository dedicato a questo modulo sotto forma di file compresso al link [https://github.com/advana-hub/modulo-dima-2025/releases](https://github.com/advana-hub/modulo-dima-2025/releases)
+        2. estrarre il contenuto dello zip file
+    """
+
+
+    mo.md(f"""
+    {way_with_git if git_toggle.value else way_without_git}
+        3. eseguire/modificare ogni notebook localmente tramite `uvx marimo edit <NOME_LEZIONE>.py` (se avete creato un venv e installato marimo, non serve nemmeno il comando `uvx`)
+        """)
+    return way_with_git, way_without_git
 
 
 @app.cell
