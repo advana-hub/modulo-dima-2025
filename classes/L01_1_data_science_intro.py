@@ -1,7 +1,7 @@
 
 # /// script
 # dependencies = [
-#   "marimo==0.11.19",
+#   "marimo>=0.11.18",
 # ]
 # ///
 

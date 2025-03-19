@@ -1,12 +1,12 @@
 # /// script
 # dependencies = [
-#   "marimo==0.11.19",
+#   "marimo>=0.11.18",
 # ]
 # ///
 
 import marimo
 
-__generated_with = "0.11.17"
+__generated_with = "0.11.21"
 app = marimo.App(width="full")
 
 
@@ -214,26 +214,6 @@ def _(mo):
 
 @app.cell
 def _(git_toggle, mo):
-    mo.md(
-        rf"""
-        # Come si possono utilizzare i notebook di questo corso?
-
-        Il materiale del corso verrà rilasciato sulla piattaforma GitHub, in questa Git repository: https://github.com/advana-hub/modulo-dima-2025
-
-        Potete procedere:
-
-        - eseguendo direttamente ciascun notebook grazie all'installazione di uv, tramite il comando `uvx marimo run https://github.com/advana-hub/modulo-dima-2025/blob/main/classes/<NOME_LEZIONE>.py`
-        - oppure per una strada più classica, che richiede però qualche setup aggiuntivo
-    
-        {git_toggle}
-
-        """
-    )
-    return
-
-
-@app.cell
-def _(git_toggle, mo):
     way_with_git = """
         1. installare [git](https://git-scm.com/downloads)
         2. clonare la repository tramite `git clone https://github.com/advana-hub/modulo-dima-2025.git`
@@ -243,9 +223,22 @@ def _(git_toggle, mo):
         2. estrarre il contenuto dello zip file
     """
 
+    mo.md(
+        rf"""
+        # Come si possono utilizzare i notebook di questo corso?
 
-    mo.md(f"""
-    {way_with_git if git_toggle.value else way_without_git}
+        Il materiale del corso verrà rilasciato sulla piattaforma GitHub, in questa Git repository: https://github.com/advana-hub/modulo-dima-2025
+
+        Potete procedere:
+
+        - eseguendo direttamente ciascun notebook grazie all'installazione di uv, tramite il comando `uvx marimo run https://github.com/advana-hub/modulo-dima-2025/blob/main/classes/<NOME_LEZIONE>.py`
+        /// warning
+        Questo approccio è molto semplice, ma ha alcune limitazioni: per esempio, se il notebook utilizza contenuti esterni (es. immagini, dati), questi non risultano disponibili.
+        ///
+        - oppure per una strada più classica, che richiede però qualche setup aggiuntivo
+    
+            {git_toggle}
+            {way_with_git if git_toggle.value else way_without_git}
         3. eseguire/modificare ogni notebook localmente tramite `uvx marimo edit <NOME_LEZIONE>.py` (se avete creato un venv e installato marimo, non serve nemmeno il comando `uvx`)
         """)
     return way_with_git, way_without_git
@@ -304,37 +297,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Help!
-
-        Come ogni buon amico, Python offre alcune ricche funzionalità di _help_.
-        """
-    )
-    return
-
-
-@app.cell
-def _():
-    help(print)
-    return
-
-
-@app.cell
-def _():
-    help("if")
-    return
-
-
-@app.cell
-def _():
-    help("TRUTHVALUE")
-    return
-
-
-@app.cell
-def _():
-    help("symbols")
+    mo.md(r"""# Le feature di marimo""")
     return
 
 
