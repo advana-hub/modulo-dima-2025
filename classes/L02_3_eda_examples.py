@@ -11,7 +11,7 @@
 
 import marimo
 
-__generated_with = "0.11.28"
+__generated_with = "0.12.0"
 app = marimo.App(width="full")
 
 
@@ -56,12 +56,6 @@ def _(mo):
 
 
 @app.cell
-def _(pd):
-    df = pd.read_parquet("../data/data.parquet")
-    return (df,)
-
-
-@app.cell
 def _(mo):
     mo.md(r"""# Analisi dello schema""")
     return
@@ -74,32 +68,14 @@ def _(mo):
 
 
 @app.cell
-def _(df):
-    len(df)
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(r"""## quanti attributi ho a disposizione?""")
     return
 
 
 @app.cell
-def _(df):
-    len(df.columns)
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(r"""## uno shortcut""")
-    return
-
-
-@app.cell
-def _(df):
-    df.shape
     return
 
 
@@ -118,32 +94,14 @@ def _(mo):
 
 
 @app.cell
-def _(df):
-    df.columns
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(r"""## sono presenti solo valori numerici?""")
     return
 
 
 @app.cell
-def _(df):
-    df.dtypes.to_frame("dtype").transpose()
-    return
-
-
-@app.cell
 def _(mo):
-    mo.md(r"""## vediamo una preview e sfruttiamo la UX di Marimo!""")
-    return
-
-
-@app.cell
-def _(df):
-    df.head()
+    mo.md(r"""## vediamo una preview del dataset""")
     return
 
 
@@ -160,20 +118,8 @@ def _(mo):
 
 
 @app.cell
-def _(df):
-    df.duplicated().max()
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(r"""## ci sono colonne con valori mancanti o non validi?""")
-    return
-
-
-@app.cell
-def _(df):
-    df.isnull().max()
     return
 
 
@@ -191,117 +137,45 @@ def _(mo):
 
 
 @app.cell
-def _(df):
-    df.select_dtypes("number")
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(r"""## i dati seguono delle distribuzioni particolari?""")
     return
 
 
 @app.cell
-def _(df):
-    df.select_dtypes("number").hist()
-    return
-
-
-@app.cell
 def _(mo):
-    mo.md(r"""## i dati presentano dinamiche temporali "interessanti"?""")
-    return
+    mo.md(
+        r"""
+        ## i dati presentano dinamiche temporali "interessanti"?
 
-
-@app.cell
-def _(df):
-    (
-        df
-        .assign(review_time=lambda x: x["date"].apply(lambda x: str(x.time())[:5]))
-        .groupby("review_time")
-        ["review_id"]
-        .nunique()
-        .plot()
+        Proviamo, ad esempio, a visualizzare la distribuzione degli orari in cui gli utenti pubblicano recensioni
+        """
     )
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""## ci sono relazioni tra le colonne?""")
+    mo.md(
+        r"""
+        ## ci sono relazioni tra le colonne?
+
+        Visualizziamo per esempio lat e lon
+        """
+    )
     return
-
-
-@app.cell
-def _(df, px):
-    fig = px.scatter(df, x="longitude", y="latitude")
-    fig.update_yaxes(
-        scaleanchor="x",
-        scaleratio=1,
-      )
-    return (fig,)
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""# Spazio alla curiosità: visualizziamo!""")
+    mo.md(
+        r"""
+        # Spazio alla curiosità: visualizziamo!
+
+        Scopo dell'esperimento: visualizzare su mappa geografica i luoghi recensiti dall'utente che ha espresso più recensioni.
+        """
+    )
     return
-
-
-@app.cell
-def _(df):
-    top_reviewer = (
-        df
-        .groupby("user_id")
-        ["review_id"]
-        .nunique()
-        .sort_values(ascending=False)
-        .head(1)
-        .index
-        .item()
-    )
-    return (top_reviewer,)
-
-
-@app.cell
-def _(df, top_reviewer):
-    user_data = df.loc[df["user_id"]==top_reviewer].sort_values("date").reset_index(drop=True)
-    user_data
-    return (user_data,)
-
-
-@app.cell
-def _():
-    import folium
-    import folium.plugins
-    return (folium,)
-
-
-@app.cell
-def _(folium, user_data):
-    geomap = folium.Map(
-        location=[
-            user_data["latitude"].mean(),
-            user_data["longitude"].mean()
-        ],
-        zoom_start=13
-    )
-
-    for i, row in user_data.iterrows():
-        popup = folium.Popup(
-            row["categories"] + "<br><br>" + row["text"],
-            min_width=500,
-            max_width=500
-        )
-        folium.Marker(
-            location=[row["latitude"], row["longitude"]],
-            popup=popup,
-            tooltip=row.drop(["text", "categories"]).to_frame().to_html()
-        ).add_to(geomap)
-
-    geomap
-    return geomap, i, popup, row
 
 
 @app.cell
