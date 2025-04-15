@@ -250,25 +250,5 @@ def _(mo):
     return
 
 
-@app.cell
-def _(mo):
-    mo.md(
-        """
-        /// tip | Approfondimenti & link utili
-
-            - [📖 Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow, 3rd Edition - Capitolo 8 - Dimensionality Reduction](https://github.com/ageron/handson-ml3)
-
-            - [🤓 The Johnson-Lindenstrauss bound for embedding with random projections - scikit-learn](https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_johnson_lindenstrauss_bound.html#sphx-glr-auto-examples-miscellaneous-plot-johnson-lindenstrauss-bound-py)
-
-            - [🗺️ How UMAP Works](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)
-
-            - [🪼 Manifold learning - scikit-learn](https://scikit-learn.org/stable/modules/manifold.html)
-
-        ///
-        """
-    )
-    return
-
-
 if __name__ == "__main__":
     app.run()
