@@ -11,20 +11,21 @@
 
 import marimo
 
-__generated_with = "0.12.7"
+__generated_with = "0.12.9"
 app = marimo.App(width="full")
 
 
 @app.cell
 def _():
     import random
-    import re
 
     from collections import Counter
+    from typing import Callable
 
     import marimo as mo
     import pandas as pd
-    return Counter, mo, pd, random, re
+
+    return Callable, Counter, mo, pd, random
 
 
 @app.cell
@@ -44,9 +45,15 @@ def _(mo):
 
 
 @app.cell
+def _(pd):
+    df = pd.read_parquet("../data/data.parquet")
+    return (df,)
+
+
+@app.cell
 def _(mo):
     mo.md(
-        r"""
+        rf"""
         La risposta a tutte le nostre domande non è unica, ma sicuramente deve essere preceduta da un'altra domanda "preliminare".
 
         Come possiamo estrarre dell'**informazione strutturata** a partire dalla colonna `text` che contiene il testo delle recensioni?
@@ -74,9 +81,118 @@ def _(mo):
 
 
 @app.cell
+def _():
+    from wordcloud import WordCloud
+
+    def build_wordcloud(
+        frequencies: dict | None = None, text: str | None = None, **kwargs
+    ) -> None:
+        stopwords = kwargs.get("stopwords")
+        if stopwords is None:
+            return WordCloud(**kwargs).generate_from_frequencies(frequencies).to_array()
+        else:
+            return WordCloud(**kwargs).generate_from_text(text).to_array()
+
+    return WordCloud, build_wordcloud
+
+
+@app.cell
+def _(Counter, build_wordcloud, df, mo):
+    mo.md(f"""Cosa si può notare nella seguente wordcloud?
+    {
+        mo.image(
+            build_wordcloud(
+                frequencies=Counter(" ".join(df["text"][:1_000]).split()),
+            ),
+            width=500,
+        )
+    }""")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""Rimuoviamo ora le _stop words_, ovvero parole frequenti considerate neutre dal punto di vista semantico in un determinato contesto.""")
     return
+
+
+@app.cell
+def _():
+    # SEE: https://github.com/explosion/spaCy/blob/master/spacy/lang/en/stop_words.py
+    # Stop words
+    stop_words = set(
+        """
+        a about above across after afterwards again against all almost alone along
+        already also although always am among amongst amount an and another any anyhow
+        anyone anything anyway anywhere are around as at
+
+        back be became because become becomes becoming been before beforehand behind
+        being below beside besides between beyond both bottom but by
+
+        call can cannot ca could
+
+        did do does doing done down due during
+
+        each eight either eleven else elsewhere empty enough even ever every
+        everyone everything everywhere except
+
+        few fifteen fifty first five for former formerly forty four from front full
+        further
+
+        get give go
+
+        had has have he hence her here hereafter hereby herein hereupon hers herself
+        him himself his how however hundred
+
+        i if in indeed into is it its itself
+
+        keep
+
+        last latter latterly least less
+
+        just
+
+        made make many may me meanwhile might mine more moreover most mostly move much
+        must my myself
+
+        name namely neither never nevertheless next nine no nobody none noone nor not
+        nothing now nowhere
+
+        of off often on once one only onto or other others otherwise our ours ourselves
+        out over own
+
+        part per perhaps please put
+
+        quite
+
+        rather re really regarding
+
+        same say see seem seemed seeming seems serious several she should show side
+        since six sixty so some somehow someone something sometime sometimes somewhere
+        still such
+
+        take ten than that the their them themselves then thence there thereafter
+        thereby therefore therein thereupon these they third this those though three
+        through throughout thru thus to together too top toward towards twelve twenty
+        two
+
+        under until up unless upon us used using
+
+        various very very via was we well were what whatever when whence whenever where
+        whereafter whereas whereby wherein whereupon wherever whether which while
+        whither who whoever whole whom whose why will with within without would
+
+        yet you your yours yourself yourselves
+        """.split()
+    )
+
+    contractions = ["n't", "'d", "'ll", "'m", "'re", "'s", "'ve"]
+    stop_words.update(contractions)
+
+    for apostrophe in ["‘", "’"]:
+        for stopword in contractions:
+            stop_words.add(stopword.replace("'", apostrophe))
+    return apostrophe, contractions, stop_words, stopword
 
 
 @app.cell
@@ -89,7 +205,7 @@ def _(mo):
 
         L'approccio più semplice tra quelli standard per l'estrazione di feature quantitative a partire da dato testuale riprende sia i concetti di _multiinsieme_ sia quelli di _one-hot encoding_ e si chiama **bag of words**.
 
-        Tale approccio consiste in:
+        Tale approccio consiste in:<a id="bow-steps"></a>
 
         1. definizione di una procedura di _tokenization_, ovvero suddivisione del testo in componenti più piccole dette _token_;
         2. individuazione del _vocabolario_, ovvero dell'insieme di token univoci costituenti il corpus di documenti;
@@ -101,14 +217,23 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        r"""
-        ### Implementazione manuale
-
-        Proviamo a definire "a mano" una funzione che implementi il bag of words.
-        """
+def _(pd):
+    small_df = pd.DataFrame(
+        {
+            "text": [
+                "Un asino, un cane, un gallo e una gatta, vanno a Brema.",
+                "Sulla strada per Brema, scacciano dei briganti da un casolare accogliente.",
+                "Una notte un brigante prova a rientrare nel casolare.",
+                "Agli occhi del brigante, gli occhi del gatto appaiono come un paio di carboni ardenti.",
+            ]
+        }
     )
+    return (small_df,)
+
+
+@app.cell
+def _(small_df):
+    small_df
     return
 
 
@@ -122,11 +247,62 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-        Fortunatamente scikit-learn implementa un transformer che automatizza quanto fatto a mano da noi, che si chiama [`CountVectorizer`](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html#sklearn.feature_extraction.text.CountVectorizer).
+        Scikit-learn implementa un transformer che corrispondente al bag of words, che si chiama [`CountVectorizer`](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html#sklearn.feature_extraction.text.CountVectorizer).
 
         Esso ha molti [(iper)parametri](https://en.wikipedia.org/wiki/Hyperparameter_(machine_learning)) da poter configurare: studiamo l'effetto dei principali sul nostro dataset più piccolo.
         """
     )
+    return
+
+
+@app.cell
+def _(mo):
+    lowercase = mo.ui.switch(value=False, label="lowercase")
+    binary = mo.ui.switch(value=False, label="binary")
+    max_df = mo.ui.slider(start=0.0, stop=1.0, step=0.1, value=1.0, label="max_df")
+    min_df = mo.ui.slider(start=1, stop=3, step=1, value=1, label="min_df")
+    max_features = mo.ui.slider(
+        start=1, stop=40, step=1, value=40, label="max_features"
+    )
+    ngram_range = mo.ui.range_slider(
+        start=1, stop=3, step=1, value=(1, 1), label="ngram_range"
+    )
+    stop_words_ = mo.ui.text_area(full_width=True, label="stop_words")
+    return (
+        binary,
+        lowercase,
+        max_df,
+        max_features,
+        min_df,
+        ngram_range,
+        stop_words_,
+    )
+
+
+@app.cell
+def _():
+    from sklearn.feature_extraction.text import CountVectorizer
+    return (CountVectorizer,)
+
+
+@app.cell
+def _(CountVectorizer, small_df):
+    vectorizer = CountVectorizer()
+    vectorizer.fit(small_df["text"])
+    return (vectorizer,)
+
+
+@app.cell
+def _(
+    binary,
+    lowercase,
+    max_df,
+    max_features,
+    min_df,
+    ngram_range,
+    stop_words_,
+):
+    lowercase, binary, max_df, min_df, max_features, ngram_range, stop_words_
     return
 
 
@@ -137,7 +313,7 @@ def _(mo):
         /// tip | Una prima rappresentazione strutturata
         Nella sua semplicità, l'approccio bag of words rappresenta la prima risposta alla domanda: _"Come si può estrarre dell'informazione strutturata a partire da un dato testuale?"_
 
-        Essenzialmente, infatti, il bag of words è una mappa
+        Essenzialmente, infatti, il bag of words è una mappa<a id="bow-map"></a>
         $$\begin{align*}
         \text{BoW}:\mathcal{D}&\to\mathbb{N}^k\\
         d&\mapsto (n_1,\dots,n_k)
@@ -195,8 +371,8 @@ def _(mo):
         r"""
         L'approccio prende il nome dai due termini fondamentali che vengono considerati:
 
-        - la _term frequency_ di un token in un documento, indicata come $\text{tf}(t, d)$, che coincide con $\text{BoW}(d)_i$ con $t=t_i$
-        - l'_inverse document frequency_ di un token nel corpus di documenti, indicata come $\text{idf}(t)$
+        - la _term frequency_ di un token in un documento, indicata come $\text{tf}(t, d)$, che coincide con $\text{BoW}(d)_i$ con $t=t_i$ - ovvero il numero di occorrenze di un token in uno specifico documento;
+        - l'_inverse document frequency_ di un token nel corpus di documenti, indicata come $\text{idf}(t)$, ovvero una quantità inversamente proporzionale al numero di occorrenze di un token nell'intero corpus dei documenti.
 
         La tf-idf non è altro che il prodotto di questi due termini, ovvero $\text{tf-idf}(t, d)=\text{tf}(t, d)\times\text{idf}(t)$.
         """
@@ -248,6 +424,50 @@ def _(mo):
 
 
 @app.cell
+def _():
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    return (TfidfVectorizer,)
+
+
+@app.cell
+def _(
+    TfidfVectorizer,
+    binary,
+    lowercase,
+    max_df,
+    max_features,
+    min_df,
+    ngram_range,
+    stop_words_,
+):
+    tfidf_vectorizer = TfidfVectorizer(
+        lowercase=lowercase.value,
+        binary=binary.value,
+        max_df=max_df.value,
+        min_df=min_df.value,
+        max_features=max_features.value,
+        ngram_range=tuple(ngram_range.value),
+        stop_words=None if not stop_words_.value else stop_words_.value.split(),
+    )
+    return (tfidf_vectorizer,)
+
+
+@app.cell
+def _(
+    binary,
+    lowercase,
+    max_df,
+    max_features,
+    min_df,
+    ngram_range,
+    stop_words_,
+):
+    lowercase, binary, max_df, min_df, max_features, ngram_range, stop_words_
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(
         r"""
@@ -264,6 +484,37 @@ def _(mo):
         """
     )
     return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+        # Assignment per il 07/05
+
+        /// tip | implementare una versione "casalinga" del bag of words
+        ///
+
+        Prova a scrivere una o più funzioni (o direttamente una classe con i suoi metodi!) che implementino il bag of words visto a lezione.
+
+        L'interfaccia di tale implementazione deve soddisfare i seguenti requisiti:
+
+        1. ricevere in input il dataframe `small_df` definito in precedenza;
+        2. restituire il medesimo dataframe con la colonna di `"text"` originale e in più le colonne corrispondenti alla vettorizzazione del bag of words.
+
+        Non preoccuparti di gestire "tutte le casistiche" che ti vengono in mente (a meno tu non voglia farlo!), lo scopo di questo esercizio è prendere confidenza con Python, Pandas e le idee fondamentali del bag of words.
+
+        Per aiutarti, puoi fare riferimento alla sua [rappresentazione funzionale](#bow-map) oppure ai [passi](#bow-steps) tramite cui lo abbiamo definito.
+        """
+    )
+    return
+
+
+@app.cell
+def _(small_df):
+    bag_of_words = lambda x: x # implementala tu!
+    bag_of_words(small_df)
+    return (bag_of_words,)
 
 
 if __name__ == "__main__":
