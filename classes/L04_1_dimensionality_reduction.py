@@ -138,9 +138,9 @@ def _(mo):
 
         ## Principal Components Analysis (PCA)
 
-        La tecnica più nota per la riduzione di dimensionalità è detta PCA. A partire da un set di dati di dimensione $d$, questa tecnica permette di identificare l'iperpiano di dimensione $d' < d$ tale per cui una proiezione dei punti su di esso preserva maggiormente la varianza dei punti.
+        La tecnica più nota per la riduzione di dimensionalità è detta PCA. A partire da un set di dati di dimensione $d$, questa tecnica permette di identificare l'iperpiano di dimensione $d' < d$ tale per cui proiettando i dati su di esso la varianza viene maggiormente preservata.
 
-        Vediamo un esempio concreto. Assumiamo di avere raccolto dei campioni in uno spazio 3d e di visualizziamoli tramite scatterplot. Cosa possiamo notare?
+        Vediamo un esempio concreto. Assumiamo di avere raccolto dei campioni in uno spazio 3d e visualizziamoli tramite scatterplot. Cosa possiamo notare?
         """
     )
     return

@@ -15,7 +15,7 @@
 
 import marimo
 
-__generated_with = "0.12.9"
+__generated_with = "0.13.6"
 app = marimo.App(width="medium")
 
 
@@ -39,31 +39,17 @@ def _():
     from plotly.subplots import make_subplots
 
     pd.options.plotting.backend = "plotly"
-    return (
-        PCA,
-        SparseRandomProjection,
-        TfidfVectorizer,
-        go,
-        johnson_lindenstrauss_min_dim,
-        make_subplots,
-        metrics,
-        mo,
-        np,
-        pd,
-        px,
-        pyarrow,
-        umap,
-    )
+    return (mo,)
 
 
 @app.cell
 def _(mo):
     mo.md(
         r"""
-        ## Dimensionality reduction pt. 2
+    ## Dimensionality reduction pt. 2
 
-        Vediamo ora come questa tecnica possa essere applicata per ridurre la dimensionalità del nostro dataset di Yelp. Iniziamo con il caricare in memoria il dataframe delle review già sfruttato nei laboratori precedenti.
-        """
+    Vediamo ora come questa tecnica possa essere applicata per ridurre la dimensionalità del nostro dataset di Yelp. Iniziamo con il caricare in memoria il dataframe delle review già sfruttato nei laboratori precedenti.
+    """
     )
     return
 
@@ -88,10 +74,10 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        Prima di procedere è necessario chiarire quali siano le nostre intenzioni. Perché stiamo cercando di ridurre la dimensionalità dei dati? Vogliamo semplicemente visualizzare i punti su un piano cartesiano, e allora saremo obbligati a scegliere una dimensione pari a 2 o al massimo 3, o vogliamo usare PCA come step di preprocessing in una pipeline più lunga di operazioni?
+    Prima di procedere è necessario chiarire quali siano le nostre intenzioni. Perché stiamo cercando di ridurre la dimensionalità dei dati? Vogliamo semplicemente visualizzare i punti su un piano cartesiano, e allora saremo obbligati a scegliere una dimensione pari a 2 o al massimo 3, o vogliamo usare PCA come step di preprocessing in una pipeline più lunga di operazioni?
 
-        Partiamo con il primo caso. Riduciamo la dimensionalità della rappresentazione a vettoriale a $d'=3$ e visualizziamo la nuvola di punti.
-        """
+    Partiamo con il primo caso. Riduciamo la dimensionalità della rappresentazione a vettoriale a $d'=3$ e visualizziamo la nuvola di punti.
+    """
     )
     return
 
@@ -119,15 +105,15 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        Dalla semplice visualizzazione in 3 dimensioni non è sempre possibile trarre delle conclusioni solide sui dati raccolti. In questo caso, ad esempio, i punti sono stati colorati in base alla quantità di _stars_ assegnate ad ogni review, e, grazie a questa rappresentazione, è possibile intuire dei pattern.
+    Dalla semplice visualizzazione in 3 dimensioni non sempre è possibile trarre delle conclusioni solide sui dati raccolti. In questo caso, però, colorando i punti in base alla quantità di _stars_ assegnate ad ogni review, è possibile __intuire__ dei pattern.
 
-        È però lecito porsi il dubbio: volendo utilizzare PCA come step di preprocessing in una pipeline più lunga, come avremmo potuto, in maniera quantitativa, scegliere una dimensionalità adeguata? Leggasi, una dimensionalità che permetta di preservare la maggior parte della varianza, escludendo le componenti superflue?
+    È comunque lecito porsi il dubbio: volendo utilizzare PCA come step di preprocessing in una pipeline più lunga, come avremmo potuto, in maniera quantitativa, scegliere una dimensionalità adeguata? In altre parole, una dimensionalità che permetta di **preservare** la maggior parte della varianza, escludendo le componenti superflue?
 
-        Per rispondere a questa domanda, osserviamo l'andamento della somma cumulata di explained_variance_ratio_ che misura, per ogni _principal component_ la quantità di varianza spiegata.
+    Per rispondere a questa domanda, osserviamo l'andamento della somma cumulata di explained_variance_ratio_ che misura, per ogni _principal component_ la quantità di varianza spiegata.
 
 
-        Una scelta ragionevole può essere quella di impostare una soglia di varianza catturata che _ci soddisfi_ (es 75%), e di fermarci alla dimensionalità $d^*$ che ci permette di catturarla.
-        """
+    Una scelta ragionevole può essere quella di impostare una soglia di varianza catturata che _ci soddisfi_ (es 75%), e di fermarci alla dimensionalità $d^*$ che ci permette di catturarla.
+    """
     )
     return
 
@@ -135,13 +121,13 @@ def _(mo):
 @app.cell
 def _():
     thresh = 0.75
-    return (thresh,)
+    return
 
 
 @app.cell
 def _():
-    # hint 1: Cos'è pca.explained_variance_ratio_ ?
-    # hint 2: cosa implementa np.cumsum ?
+    # hint 1: Osserviamo cosa contiene pca.explained_variance_ratio_
+    # hint 2: Per implementare la somma cumulata possiamo usare np.cumsum
     return
 
 
@@ -149,18 +135,18 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        ## Uniform Manifold Approximation and Projection (UMAP)
+    ## Uniform Manifold Approximation and Projection (UMAP)
 
-        Veniamo infine alla tecnica che, ad oggi, è diventata lo standard _de-facto_ per effettuare task di _dimensionality reduction_ in molti contesti reali: __UMAP__.
+    Veniamo infine alla tecnica che, ad oggi, è diventata lo standard _de-facto_ per effettuare task di _dimensionality reduction_ in molti contesti reali: __UMAP__.
 
-        Questa tecnica sfrutta concetti di _manifold learning_, _topological data analysis_ e _fuzzy logic_ per identificare una rappresentazione di dimensione arbitraria di un insieme di punti (originariamente in alta dimensionalità) cercando di preservare il più possibile le loro proprietà _locali_.
+    Questa tecnica sfrutta concetti di _manifold learning_, _topological data analysis_ e _fuzzy logic_ per identificare una rappresentazione di dimensione arbitraria di un insieme di punti (originariamente in alta dimensionalità) cercando di preservare il più possibile le loro proprietà _locali_.
 
-        L'algorimo di UMAP prevede due step, il primo passo consiste nella creazione di un _k-neighbor graph_, ovvero un grafo in cui due nodi (_ie_ due samples) sono connessi da un arco se sufficientemente _vicini_ in alta dimensionalità. Il secondo step consiste nell'identificazione di una proiezione in bassa dimensionalità dei punti in maniera tale che il _k-neighbor graph_ costruito su di essa sia il più simile possibile a quello ricavato originariamente.
+    L'algorimo di UMAP prevede due step, il primo passo consiste nella creazione di un _k-neighbor graph_, ovvero un grafo in cui due nodi (_ie_ due samples) sono connessi da un arco se sufficientemente _vicini_ in alta dimensionalità. Il secondo step consiste nell'identificazione di una proiezione in bassa dimensionalità dei punti in maniera tale che il _k-neighbor graph_ costruito su di essa sia il più simile possibile a quello ricavato originariamente.
 
-        Una implementazione di questa tecnica __non__ è disponibile tramite scikit-≤arnscikit-learn, ma esiste una library Python sviluppata dai creatori di UMAP che offre un tranormertransformer totalmente compatibile con le API di scikit-learn (che di fatto sono uno standard nel mondo del machine learning).
+    Una implementazione di questa tecnica __non__ è disponibile tramite scikit-learn, ma esiste una library Python sviluppata dai creatori di UMAP che offre un transformer totalmente compatibile con le API di scikit-learn (che di fatto sono uno standard nel mondo del machine learning).
 
-        Vediamo come possiamo applicare UMAP al nostro dataset e visualizziamo i samples nello spazio così ottenuto.
-        """
+    Vediamo come possiamo applicare UMAP al nostro dataset e visualizziamo i samples nello spazio così ottenuto.
+    """
     )
     return
 
@@ -195,7 +181,7 @@ def _(mo):
     )
 
     mo.md(f"{n_neighbors}  {min_dist} {spread} {metric}")
-    return metric, min_dist, n_neighbors, spread
+    return
 
 
 @app.cell
@@ -219,18 +205,16 @@ def _(mo):
 def _(mo):
     mo.md(
         """
-        /// tip | Approfondimenti & link utili
+    /// tip | Approfondimenti & link utili
 
-            - [📖 Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow, 3rd Edition - Capitolo 8 - Dimensionality Reduction](https://github.com/ageron/handson-ml3)
+        - [📖 Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow, 3rd Edition - Capitolo 8 - Dimensionality Reduction](https://github.com/ageron/handson-ml3)
 
-            - [🤓 The Johnson-Lindenstrauss bound for embedding with random projections - scikit-learn](https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_johnson_lindenstrauss_bound.html#sphx-glr-auto-examples-miscellaneous-plot-johnson-lindenstrauss-bound-py)
+        - [🗺️ How UMAP Works](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)
 
-            - [🗺️ How UMAP Works](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html)
+        - [🪼 Manifold learning - scikit-learn](https://scikit-learn.org/stable/modules/manifold.html)
 
-            - [🪼 Manifold learning - scikit-learn](https://scikit-learn.org/stable/modules/manifold.html)
-
-        ///
-        """
+    ///
+    """
     )
     return
 
